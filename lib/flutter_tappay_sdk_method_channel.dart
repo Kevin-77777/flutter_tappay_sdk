@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_tappay_sdk/tappay/pending_item.dart';
 
 import 'flutter_tappay_sdk_platform_interface.dart';
 import 'models/tappay_init_result.dart';
@@ -207,9 +208,12 @@ class MethodChannelFlutterTapPaySdk extends FlutterTapPaySdkPlatform {
 
   @override
   Future<TapPayPrime?> requestApplePay({
-    required List<CartItem> cartItems,
     required String currencyCode,
     required String countryCode,
+    List<CartItem> cartItems = const [],
+    List<PendingItem> pendingItems = const [],
+    bool isAmountPending = false,
+    bool isShowTotalAmount = true,
   }) async {
     if (Platform.isIOS == false) {
       return TapPayPrime(
@@ -217,7 +221,7 @@ class MethodChannelFlutterTapPaySdk extends FlutterTapPaySdkPlatform {
           message: "Apple Pay is only available on iOS devices.");
     }
 
-    if (cartItems.isEmpty) {
+    if (cartItems.isEmpty && pendingItems.isEmpty) {
       return TapPayPrime(
           success: false, message: "The cart items cannot be empty.");
     }
@@ -238,6 +242,11 @@ class MethodChannelFlutterTapPaySdk extends FlutterTapPaySdkPlatform {
           cartItems.map((CartItem cartItem) => cartItem.toMap()).toList(),
       'currencyCode': currencyCode,
       'countryCode': countryCode,
+      "isAmountPending": isAmountPending,
+      "isShowTotalAmount": isShowTotalAmount,
+      "pendingItems": pendingItems
+          .map((PendingItem pendingItem) => pendingItem.toMap())
+          .toList(),
     });
 
     if (result == null) {

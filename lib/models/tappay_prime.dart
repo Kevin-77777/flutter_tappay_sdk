@@ -9,6 +9,9 @@ class TapPayPrime {
     this.status,
     this.message,
     this.prime,
+    this.name,
+    this.email,
+    this.phone,
   });
 
   /// The result of getting card's prime
@@ -27,17 +30,34 @@ class TapPayPrime {
   ///
   final String? prime;
 
+  /// The name of the card
+  ///
+  final String? name;
+
+  /// The email of the card
+  ///
+  final String? email;
+
+  /// The phone of the card
+  final String? phone;
+
   TapPayPrime copyWith({
     bool? success,
     int? status,
     String? message,
     String? prime,
+    String? name,
+    String? email,
+    String? phone,
   }) {
     return TapPayPrime(
       success: success ?? this.success,
       status: status ?? this.status,
       message: message ?? this.message,
       prime: prime ?? this.prime,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      phone: phone ?? this.phone,
     );
   }
 
@@ -47,6 +67,9 @@ class TapPayPrime {
       'status': status,
       'message': message,
       'prime': prime,
+      'name': name,
+      'email': email,
+      'phone': phone,
     };
   }
 
@@ -56,6 +79,9 @@ class TapPayPrime {
       status: map['status'] != null ? map['status'] as int : null,
       message: map['message'] != null ? map['message'] as String : null,
       prime: map['prime'] != null ? map['prime'] as String : null,
+      name: map['name'] != null ? map['name'] as String : null,
+      email: map['email'] != null ? map['email'] as String : null,
+      phone: map['phone'] != null ? map['phone'] as String : null,
     );
   }
 
@@ -66,7 +92,7 @@ class TapPayPrime {
 
   @override
   String toString() {
-    return 'TapPayPrime(success: $success, status: $status, message: $message, prime: $prime)';
+    return 'TapPayPrime(success: $success, status: $status, message: $message, prime: $prime, name: $name, email: $email, phone: $phone)';
   }
 
   @override
@@ -76,7 +102,10 @@ class TapPayPrime {
     return other.success == success &&
         other.status == status &&
         other.message == message &&
-        other.prime == prime;
+        other.prime == prime &&
+        other.name == name &&
+        other.email == email &&
+        other.phone == phone;
   }
 
   @override
@@ -84,6 +113,9 @@ class TapPayPrime {
     return success.hashCode ^
         status.hashCode ^
         message.hashCode ^
-        prime.hashCode;
+        prime.hashCode ^
+        name.hashCode ^
+        email.hashCode ^
+        phone.hashCode;
   }
 }

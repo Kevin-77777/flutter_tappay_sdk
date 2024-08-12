@@ -1,4 +1,5 @@
 import 'package:flutter_tappay_sdk/models/tappay_prime.dart';
+import 'package:flutter_tappay_sdk/tappay/pending_item.dart';
 
 import 'flutter_tappay_sdk_platform_interface.dart';
 import 'models/tappay_init_result.dart';
@@ -198,14 +199,20 @@ class FlutterTapPaySdk {
   /// return [null] if the card information is incomplete
   ///
   Future<TapPayPrime?> requestApplePay({
-    required List<CartItem> cartItems,
+    List<CartItem> cartItems = const [],
     String currencyCode = 'TWD',
     String countryCode = 'TW',
+    bool isAmountPending = false,
+    bool isShowTotalAmount = true,
+    List<PendingItem> pendingItems = const [],
   }) {
     return FlutterTapPaySdkPlatform.instance.requestApplePay(
       cartItems: cartItems,
       currencyCode: currencyCode,
       countryCode: countryCode,
+      isAmountPending: isAmountPending,
+      isShowTotalAmount: isShowTotalAmount,
+      pendingItems: pendingItems,
     );
   }
 

@@ -95,7 +95,10 @@ public class FlutterTapPaySdkPlugin: NSObject, FlutterPlugin {
       requestApplePay(
         cartItems: args["cartItems"] as? [[String: Any]],
         currencyCode: args["currencyCode"] as? String,
-        countryCode: args["countryCode"] as? String
+        countryCode: args["countryCode"] as? String,
+        isAmountPending: args["isAmountPending"] as? Bool,
+        isShowTotalAmount: args["isShowTotalAmount"] as? Bool,
+        pendingItems: args["pendingItems"] as? [[String:Any]]
       ) {
         response in result(response)
       }
@@ -198,9 +201,12 @@ public class FlutterTapPaySdkPlugin: NSObject, FlutterPlugin {
     cartItems: [[String: Any]]? = nil,
     currencyCode: String? = nil,
     countryCode: String? = nil,
+    isAmountPending: Bool? = false,
+    isShowTotalAmount: Bool? = true,
+    pendingItems: [[String: Any]]? = nil,
     onResult: @escaping ([String: Any?]) -> Void
   ) {
-    if (cartItems == nil || currencyCode == nil || countryCode == nil) {
+    if (currencyCode == nil || countryCode == nil) {
       onResult(TapPaySdkCommonResult(success: false, message: "Missing required parameters for \"requestApplePay\" method.").toDictionary())
       return
     }
@@ -213,6 +219,9 @@ public class FlutterTapPaySdkPlugin: NSObject, FlutterPlugin {
       cartItems: cartItems,
       currencyCode: currencyCode,
       countryCode: countryCode,
+      isAmountPending: isAmountPending,
+      isShowTotalAmount: isShowTotalAmount,
+      pendingItems: pendingItems,
       onApplePayResult: callbackDelegate
     )
   }

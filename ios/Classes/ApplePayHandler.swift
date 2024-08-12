@@ -84,6 +84,7 @@ class ApplePayHandler: NSObject {
     countryCode: String? = nil,
     isAmountPending: Bool? = false,
     isShowTotalAmount: Bool? = true,
+    pendingItems: [[String: Any]]? = nil,
     onApplePayResult: AppPayHandlerPaymentCallback?
   ) {
     if (isPaymentProcessing) {
@@ -97,17 +98,23 @@ class ApplePayHandler: NSObject {
       return
     }
     
-    if (cartItems == nil || currencyCode == nil || countryCode == nil) {
+    if (currencyCode == nil || countryCode == nil) {
       onApplePayResult?(ApplePayPaymentResult(success: false, status: nil, message: "Missing required parameters for \"requestApplePay\" method.", prime: nil))
       return
     }
     
     let items = cartItems?.compactMap { CartItem.fromDictionary($0) } ?? []
-    if (items.isEmpty) {
-      onApplePayResult?(ApplePayPaymentResult(success: false, status: nil, message: "Missing required parameters \"cartItems\" for \"requestApplePay\" method.", prime: nil))
+    // if (items.isEmpty) {
+    //   onApplePayResult?(ApplePayPaymentResult(success: false, status: nil, message: "Missing required parameters \"cartItems\" for \"requestApplePay\" method.", prime: nil))
+    //   return
+    // }
+    let pendingItems = pendingItems?.compactMap { PendingItem.fromDictionary($0) } ?? []
+
+    if (items.isEmpty && pendingItems.isEmpty) {
+      onApplePayResult?(ApplePayPaymentResult(success: false, status: nil, message: "Missing required parameters \"cartItems\" or \"pendingItems\" for \"requestApplePay\" method.", prime: nil))
       return
     }
-    
+
     self.onApplePayResult = onApplePayResult
     
     // Setup country code and currency code
@@ -116,14 +123,21 @@ class ApplePayHandler: NSObject {
     
     // Setup cart
     cart = TPDCart()
-    cart.isAmountPending = false
-    cart.isShowTotalAmount = true
+    cart.isAmountPending = isAmountPending!
+    cart.isShowTotalAmount = isShowTotalAmount!
     
     // Add payment items
     for item in items {
       let paymentItem = TPDPaymentItem(itemName: item.name, withAmount: NSDecimalNumber(string: String(item.price)), withIsVisible: true)
       cart.add(paymentItem)
     }
+
+    // Add pending items
+    for item in pendingItems {
+      let pendingPaymentItem = TPDPaymentItem.pendingPaymentItem(withItemName: item.name)
+      cart.add(pendingPaymentItem)
+    }
+
     
     applePay = TPDApplePay.setupWthMerchant(merchant, with: consumer, with: cart, withDelegate: self)
     applePay.startPayment()
@@ -162,7 +176,15 @@ extension ApplePayHandler : TPDApplePayDelegate {
   
   func tpdApplePay(_ applePay: TPDApplePay!, didReceivePrime prime: String!, withExpiryMillis expiryMillis: Int, with cardInfo: TPDCardInfo!, withMerchantReferenceInfo merchantReferenceInfo: [AnyHashable : Any]!) {
     print("Apple Pay did receive prime: \(prime ?? "")")
-    onApplePayResult?(ApplePayPaymentResult(success: true, status: nil, message: "Apple Pay payment was successful.", prime: prime))
+    onApplePayResult?(ApplePayPaymentResult(
+           success: true,
+           status: nil,
+           message: "Apple Pay payment was successful.",
+           prime: prime,
+           email: applePay.consumer.billingContact?.emailAddress,
+           phone: applePay.consumer.billingContact?.phoneNumber?.stringValue,
+           name: applePay.consumer.billingContact?.name?.description
+         ))
   }
   
   func tpdApplePay(_ applePay: TPDApplePay!, didSuccessPayment result: TPDTransactionResult!) {
